@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>donntu</name>
-    <description>SpringMVC, Hibernate, Vuejs</description>
+    <description>SpringMVC, Hibernate, Vue.js</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -17,6 +17,7 @@
         <version>2.0.5.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

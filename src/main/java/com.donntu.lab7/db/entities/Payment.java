@@ -1,5 +1,6 @@
 package com.donntu.lab7.db.entities;
 
+import com.donntu.lab7.DateFormater;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -35,6 +36,6 @@ public class Payment{
 
     @Override
     public String toString() {
-        return date + "/" + form;
+        return "Оплачено " + DateFormater.format("dd.MM.yyyy", date) + " через " + form;
     }
 }

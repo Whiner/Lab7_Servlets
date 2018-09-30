@@ -1,5 +1,6 @@
 package com.donntu.lab7.db.entities;
 
+import com.donntu.lab7.DateFormater;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -29,6 +30,6 @@ public class DepartureDate {
 
     @Override
     public String toString() {
-        return date.toString();
+        return DateFormater.format("dd.MM.yyyy", date);
     }
 }
