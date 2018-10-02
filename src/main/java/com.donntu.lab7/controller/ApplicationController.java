@@ -2,9 +2,9 @@ package com.donntu.lab7.controller;
 
 import com.donntu.lab7.db.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping
@@ -15,6 +15,7 @@ public class ApplicationController {
     public ApplicationController(ApplicationService applicationService) {
         this.applicationService = applicationService;
     }
+
 
     @GetMapping("/total")
     public String getTotal() {
@@ -29,6 +30,11 @@ public class ApplicationController {
     @GetMapping("/payment")
     public String getPayment() {
         return applicationService.getJson("payment");
+    }
+
+    @DeleteMapping("/total")
+    public void delete(@RequestBody Map<String, String> id) {
+        System.out.println(id);
     }
 
 }

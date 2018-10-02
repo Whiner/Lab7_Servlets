@@ -4,6 +4,7 @@ import com.donntu.lab7.Converter;
 import com.donntu.lab7.db.entities.Client;
 import com.donntu.lab7.db.repos.ClientRepository;
 import com.donntu.lab7.db.repos.DepartureRepository;
+import com.donntu.lab7.db.repos.PaymentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,13 @@ import java.util.Map;
 public class ApplicationService {
     private ClientRepository clientRepository;
     private DepartureRepository departureRepository;
+    private PaymentRepository paymentRepository;
 
     @Autowired
-    public ApplicationService(ClientRepository clientRepository, DepartureRepository departureRepository) {
+    public ApplicationService(ClientRepository clientRepository, DepartureRepository departureRepository, PaymentRepository paymentRepository) {
         this.clientRepository = clientRepository;
         this.departureRepository = departureRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     private List<Client> getAllClients() {
@@ -56,9 +59,18 @@ public class ApplicationService {
             case "departure":
                 return getDepartureJson();
             case "payment":
-                return null;
+                return getPaymentJson();
             default:
                 return null;
         }
+    }
+
+    private String getPaymentJson() {
+        try {
+            return new ObjectMapper().writer().writeValueAsString(paymentRepository.findAll());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
