@@ -1,5 +1,7 @@
 package com.donntu.lab7.db.entities;
 
+import com.donntu.lab7.DateFormatter;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -98,5 +100,20 @@ public class Client {
                 ", date=" + departureDate.getDate() +
                 ", payment=" + payment +
                 '}';
+    }
+
+    @JsonGetter("departureDate")
+    public String getDepartureDateString() {
+        return departureDate.toString();
+    }
+
+    @JsonGetter("arrivalDate")
+    public String getArrivalDateString() {
+        return DateFormatter.format("dd.MM.yyyy", arrivalDate);
+    }
+
+    @JsonGetter("payment")
+    public String getPaymentString() {
+        return payment.toString();
     }
 }

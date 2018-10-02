@@ -1,6 +1,8 @@
 package com.donntu.lab7.db.entities;
 
-import com.donntu.lab7.DateFormater;
+import com.donntu.lab7.DateFormatter;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -8,7 +10,7 @@ import java.util.Date;
 
 @Entity
 @Data
-public class Payment{
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -19,6 +21,7 @@ public class Payment{
 
     private String note;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "client_id")
     private Client client;
@@ -34,8 +37,13 @@ public class Payment{
         this.client = client;
     }
 
+    @JsonGetter("date")
+    public String getStringDate() {
+        return DateFormatter.format("dd.MM.yyyy", date);
+    }
+
     @Override
     public String toString() {
-        return "Оплачено " + DateFormater.format("dd.MM.yyyy", date) + " через " + form;
+        return "Оплачено " + DateFormatter.format("dd.MM.yyyy", date) + " через " + form;
     }
 }

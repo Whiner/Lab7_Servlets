@@ -1,6 +1,8 @@
 package com.donntu.lab7.db.entities;
 
-import com.donntu.lab7.DateFormater;
+import com.donntu.lab7.DateFormatter;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -15,6 +17,7 @@ public class DepartureDate {
 
     private Date date;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "client_id")
     private Client client;
@@ -29,7 +32,8 @@ public class DepartureDate {
     }
 
     @Override
+    @JsonGetter("date")
     public String toString() {
-        return DateFormater.format("dd.MM.yyyy", date);
+        return DateFormatter.format("dd.MM.yyyy", date);
     }
 }
