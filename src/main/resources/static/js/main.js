@@ -2,13 +2,13 @@ Vue.component('row-settings', {
     props: ['editMethod', 'delMethod', 'object'],
     template:
     '<div class="container-fluid row">' +
-    '    <div class="col-6">' +
-    '        <a href="#">' +
+    '    <div class="col-6" >' +
+    '        <a href="#" v-if="editMethod">' +
     '            <img style="width: 25px" src="../images/edit.png" @click="editMethod(object)"/>' +
     '        </a>' +
     '    </div>' +
-    '    <div class="col-6">' +
-    '        <a href="#">' +
+    '    <div class="col-6"> ' +
+    '        <a href="#"  v-if="delMethod">' +
     '            <img style="width: 25px" src="../images/delete.png"  @click="delMethod(object)"/>' +
     '        </a>' +
     '    </div>' +
@@ -24,7 +24,7 @@ Vue.component('total-list-head', {
     '   <div class="col-1 border-right">Паспорт</div>' +
     '   <div class="col-1 border-right">Прибытие</div>' +
     '   <div class="col-1 border-right">Отбытие</div>' +
-    '   <div class="col-4">Оплата</div>' +
+    '   <div class="col-3 border-right">Оплата</div>' +
     '</div>' +
     '</div>'
 });
@@ -39,7 +39,7 @@ Vue.component('total-list-row', {
     '   <div class="col-1 border-right">{{client.passportNumber}}</div>' +
     '   <div class="col-1 border-right">{{client.arrivalDate}}</div>' +
     '   <div class="col-1 border-right">{{client.departureDate}}</div>' +
-    '   <div class="col-3">{{client.payment}}</div>' +
+    '   <div class="col-3 border-right">{{client.payment}}</div>' +
     '   <div class="col-1">' +
     '       <row-settings :editMethod="editMethod" :delMethod="delMethod" :object="client"></row-settings>' +
     '   </div>' +
@@ -69,23 +69,27 @@ Vue.component('departure-list-head', {
 });
 
 Vue.component('departure-list-row', {
-    props: ['departure'],
+    props: ['departure', 'editMethod', 'delMethod'],
     template:
     '<div class="list-group-item">' +
     '<div class="container-fluid row"> ' +
     '   <div class="col-1 border-right"></div> ' +
     '   <div class="col-1 border-right">{{departure.id}}</div> ' +
     '   <div class="col-2 border-right">{{departure.date}}</div>' +
+    '   <div class="col-1">' +
+    '       <row-settings :editMethod="editMethod" :delMethod="delMethod" :object="departure"></row-settings>' +
+    '   </div>' +
     '</div>' +
     '</div>'
 });
 
 Vue.component('departure-list', {
-    props: ['departureDates'],
+    props: ['departureDates', 'editMethod', 'delMethod'],
     template:
     '<div class="list-group">' +
     '   <departure-list-head/>' +
-    '   <departure-list-row v-for="departure in departureDates" :key="departure.id" :departure="departure" :name="departure.id"></departure-list-row>' +
+    '   <departure-list-row v-for="departure in departureDates" :key="departure.id" :departure="departure" ' +
+    ':name="departure.id" :editMethod="editMethod" :delMethod="delMethod"></departure-list-row>' +
     '</div>'
 });
 
@@ -103,7 +107,7 @@ Vue.component('payment-list-head', {
 });
 
 Vue.component('payment-list-row', {
-    props: ['payment'],
+    props: ['payment', 'editMethod', 'delMethod'],
     template:
     '<div class="list-group-item">' +
     '<div class="container-fluid row"> ' +
@@ -112,16 +116,20 @@ Vue.component('payment-list-row', {
     '   <div class="col-2 border-right">{{payment.date}}</div>' +
     '   <div class="col-2 border-right">{{payment.form}}</div>' +
     '   <div class="col-5 border-right">{{payment.note}}</div>' +
+    '   <div class="col-1">' +
+    '       <row-settings :editMethod="editMethod" :delMethod="delMethod" :object="payment"></row-settings>' +
+    '   </div>' +
     '</div>' +
     '</div>'
 });
 
 Vue.component('payment-list', {
-    props: ['payments'],
+    props: ['payments', 'editMethod', 'delMethod'],
     template:
     '<div class="list-group">' +
     '   <payment-list-head/>' +
-    '   <payment-list-row v-for="payment in payments" :key="payment.id" :payment="payment" :name="payment.id"></payment-list-row>' +
+    '   <payment-list-row v-for="payment in payments" :key="payment.id" :payment="payment" ' +
+    ':name="payment.id" :editMethod="editMethod" :delMethod="delMethod"></payment-list-row>' +
     '</div>'
 });
 
@@ -188,7 +196,7 @@ Vue.component('lists', {
     '</div>',
     methods: {
         setApi: function (_api) {
-            this.api = _api + '{/id}';
+            this.api = _api;
         },
         getData: function () {
             if (this.api === '') {
@@ -196,6 +204,7 @@ Vue.component('lists', {
             }
             this.arr = [];
             this.clientApi = Vue.resource(this.api);
+            console.log(this.api);
             this.clientApi.get().then(
                 result => {
                     result.json().then(
@@ -233,4 +242,78 @@ const list = new Vue({
     el: '#list',
     template:
         '<lists/>'
+});
+
+Vue.component('edit-form', {
+    data: function () {
+        return {
+            fio: '',
+            passport: '',
+            tel: '',
+            arrDate: '',
+            depDate: '',
+            payForm: '',
+            payDate: '',
+            note: ''
+        };
+    },
+    watch: {
+        fio: function (val) {
+
+        }
+    },
+    template:
+    '<form class="container w-50 mx-auto mt-4 mb-5">' +
+    '<div class="row">' +
+    '<div class="form-group col-6">' +
+    '    <label for="exampleFormControlInput1">ФИО клиента</label>' +
+    '    <input v-model="fio" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Фамилия Имя Отчество">' +
+    ' </div>' +
+    ' <div class="form-group col-6">' +
+    '    <label for="exampleFormControlInput2">Паспорт</label>' +
+    '    <input v-model="passport" type="text" class="form-control" id="exampleFormControlInput2" placeholder="ВТ******">' +
+    '</div> ' +
+    '</div>' +
+    '<div class="row">' +
+    '<div class="col-6 form-group">' +
+    '    <label for="exampleFormControlInput3">Номер телефона</label>' +
+    '    <input v-model="tel" type="tel" class="form-control" id="exampleFormControlInput3" placeholder="+38-071-*******">' +
+    ' </div>' +
+    '<div class="col-6 form-group ">' +
+    '    <label for="exampleFormControlInput4">Дата прибытия</label>' +
+    '    <input v-model="arrDate" type="date" class="form-control" id="exampleFormControlInput4">' +
+    '</div>' +
+    '</div> ' +
+    '<div class="row">' +
+    '<div class="col-6 form-group">' +
+    '    <label for="exampleFormControlInput5">Дата отъезда</label>' +
+    '    <input v-model="depDate" type="date" class="form-control" id="exampleFormControlInput5">' +
+    '</div>' +
+    '<div class="col-6 form-group">' +
+    '    <label for="exampleFormControlInput6">Форма платежа</label>' +
+    '    <input v-model="payForm" type="text" class="form-control" id="exampleFormControlInput6">' +
+    '</div>' +
+    '</div>' +
+    '<div class="row">' +
+    '<div class="col-6 form-group w-25">' +
+    '    <label for="exampleFormControlInput7">Дата платежа</label>' +
+    '    <input v-model="payDate" type="date" class="form-control" id="exampleFormControlInput7">' +
+    '</div>' +
+    '</div>' +
+    '<div class="row">' +
+    '<div class="col-12 form-group">' +
+    '    <label for="exampleFormControlInput8">Заметка</label>' +
+    '    <textarea v-model="note" class="form-control" id="exampleFormControlInput8" placeholder="(Не обязательно)"/>' +
+    '</div>' +
+    '</div>' +
+    '<div>' +
+    '    <input class="btn btn-outline-dark mx-auto" type="button" value="Сохранить">' +
+    '</div>' +
+    '</form>'
+});
+
+const form = new Vue({
+    el: '#add',
+    template:
+        '<edit-form/>'
 });

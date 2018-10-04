@@ -33,8 +33,19 @@ public class ApplicationController {
     }
 
     @DeleteMapping("/total")
-    public void delete(@RequestBody Map<String, String> id) {
+    public void deleteTotal(@RequestBody Map<String, String> id) {
         System.out.println(id);
     }
+
+    @DeleteMapping("/payment")
+    public void deletePayment(@RequestBody Map<String, String> id) {
+        System.out.println(id);
+    }
+
+    @DeleteMapping("/departure")
+    public void deleteDeparture(@RequestBody Map<String, String> id) {
+        System.out.println(id);
+    }
+
 
 }
