@@ -39,7 +39,7 @@ Vue.component('total-list-row', {
     '   <div class="col-1 border-right">{{client.passportNumber}}</div>' +
     '   <div class="col-1 border-right">{{client.arrivalDate}}</div>' +
     '   <div class="col-1 border-right">{{client.departureDate}}</div>' +
-    '   <div class="col-3 border-right">{{client.payment}}</div>' +
+    '   <div class="col-3 border-right">Оплачено {{client.payment.date}} через {{client.payment.form}}</div>' +
     '   <div class="col-1">' +
     '       <row-settings :editMethod="editMethod" :delMethod="delMethod" :object="client"></row-settings>' +
     '   </div>' +
@@ -179,72 +179,8 @@ Vue.component('navbar', {
     }
 });
 
-Vue.component('lists', {
-    data: function () {
-        return {
-            arr: [],
-            api: '',
-            clientApi: null
-        }
-    },
-    template:
-    '<div>' +
-    '<navbar :getData="getData" :setApi="setApi"/>' +
-    '<total-list v-if="api === \'total\'" :clients="arr" :editMethod="edit" :delMethod="del"/>' +
-    '<departure-list v-else-if="api === \'departure\'" :departureDates="arr" :editMethod="edit" :delMethod="del"/>' +
-    '<payment-list v-else-if="api === \'payment\'" :payments="arr" :editMethod="edit" :delMethod="del"/>' +
-    '</div>',
-    methods: {
-        setApi: function (_api) {
-            this.api = _api;
-        },
-        getData: function () {
-            if (this.api === '') {
-                this.api = 'total';
-            }
-            this.arr = [];
-            this.clientApi = Vue.resource(this.api);
-            console.log(this.api);
-            this.clientApi.get().then(
-                result => {
-                    result.json().then(
-                        objects => {
-                            objects.forEach(
-                                object => {
-                                    this.arr.push(object)
-                                }
-                            )
-                        })
-                }
-            );
-        },
-        del: function (object) {
-            console.log(this.api + ' ' + object.id);
-            this.clientApi.delete(this.api, {id: object.id}).then(
-                result => {
-                    if (result.ok) {
-                        this.arr.splice(this.arr.indexOf(object), 1);
-                    }
-                }
-            )
-        },
-        edit: function (object) {
-            console.log("Появится в следующей версии " + object);
-        }
-    },
-    created: function () {
-        console.log("Здарова");
-        this.getData()
-    }
-});
-
-const list = new Vue({
-    el: '#list',
-    template:
-        '<lists/>'
-});
-
 Vue.component('edit-form', {
+    props: ['client'],
     data: function () {
         return {
             fio: '',
@@ -254,12 +190,14 @@ Vue.component('edit-form', {
             depDate: '',
             payForm: '',
             payDate: '',
-            note: ''
+            note: '',
+            clientApi: null
         };
     },
     watch: {
-        fio: function (val) {
-
+        client: function (val) {
+            console.log(val);
+            this.fillClient();
         }
     },
     template:
@@ -307,13 +245,121 @@ Vue.component('edit-form', {
     '</div>' +
     '</div>' +
     '<div>' +
-    '    <input class="btn btn-outline-dark mx-auto" type="button" value="Сохранить">' +
+    '    <input class="btn btn-outline-dark mx-auto" @click="save" type="button" value="Сохранить">' +
     '</div>' +
-    '</form>'
+    '</form>',
+    methods: {
+        fillClient: function () {
+            console.log("Зашло");
+            if (this.clientApi === null) {
+                this.clientApi = Vue.resource('total');
+            }
+            if (!this.client) {
+                this.save();
+
+            } else {
+                this.fio = this.client.fio;
+                this.passport = this.client.passportNumber;
+                this.tel = this.client.phoneNumber;
+                this.arrDate = this.client.arrivalDate;
+                this.depDate = this.client.departureDate;
+                this.payForm = this.client.payment.form;
+                this.payDate = this.client.payment.date;
+                this.note = this.client.payment.note;
+            }
+        },
+        save: function () {
+            let new_client = {
+                fio: this.fio,
+                phoneNumber: this.tel,
+                passportNumber: this.passport,
+                arrivalDate: this.arrDate,
+                departureDate: this.depDate,
+                payNote: this.note,
+                payDate: this.payDate,
+                payForm: this.payForm
+
+
+            };
+            this.clientApi.save({}, new_client).then(result => {
+                if (result.ok) {
+                    console.log("Успешно");
+                }
+                console.log(result.json());
+            })
+        }
+    }
 });
 
 const form = new Vue({
     el: '#add',
+    data: {
+        client: null
+    },
     template:
-        '<edit-form/>'
+        '<edit-form :client="client"/>'
 });
+
+Vue.component('lists', {
+    data: function () {
+        return {
+            arr: [],
+            api: '',
+            clientApi: null
+        }
+    },
+    template:
+    '<div>' +
+    '<navbar :getData="getData" :setApi="setApi"/>' +
+    '<total-list v-if="api === \'total\'" :clients="arr" :editMethod="edit" :delMethod="del"/>' +
+    '<departure-list v-else-if="api === \'departure\'" :departureDates="arr" :editMethod="edit" :delMethod="del"/>' +
+    '<payment-list v-else-if="api === \'payment\'" :payments="arr" :editMethod="edit" :delMethod="del"/>' +
+    '</div>',
+    methods: {
+        setApi: function (_api) {
+            this.api = _api;
+        },
+        getData: function () {
+            if (this.api === '') {
+                this.api = 'total';
+            }
+            this.arr = [];
+            this.clientApi = Vue.resource(this.api);
+            console.log(this.api);
+            this.clientApi.get().then(
+                result => {
+                    result.json().then(
+                        objects => {
+                            objects.forEach(
+                                object => {
+                                    this.arr.push(object)
+                                }
+                            )
+                        })
+                }
+            );
+        },
+        del: function (object) {
+            this.clientApi.delete(this.api, {id: object.id}).then(
+                result => {
+                    if (result.ok) {
+                        this.arr.splice(this.arr.indexOf(object), 1);
+                    }
+                }
+            )
+        },
+        edit: function (object) {
+            form.client = object;
+        }
+    },
+    created: function () {
+        this.getData()
+    }
+});
+
+const list = new Vue({
+    el: '#list',
+    template:
+        '<lists/>'
+});
+

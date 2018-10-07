@@ -109,11 +109,11 @@ public class Client {
 
     @JsonGetter("arrivalDate")
     public String getArrivalDateString() {
-        return DateFormatter.format("dd.MM.yyyy", arrivalDate);
+        return DateFormatter.format("yyyy-MM-dd", arrivalDate);
     }
 
-    @JsonGetter("payment")
+    /*@JsonGetter("payment")
     public String getPaymentString() {
         return payment.toString();
-    }
+    }*/
 }

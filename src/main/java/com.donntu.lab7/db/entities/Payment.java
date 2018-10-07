@@ -39,7 +39,7 @@ public class Payment {
 
     @JsonGetter("date")
     public String getStringDate() {
-        return DateFormatter.format("dd.MM.yyyy", date);
+        return DateFormatter.format("yyyy-MM-dd", date);
     }
 
     @Override

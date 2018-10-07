@@ -34,6 +34,6 @@ public class DepartureDate {
     @Override
     @JsonGetter("date")
     public String toString() {
-        return DateFormatter.format("dd.MM.yyyy", date);
+        return DateFormatter.format("yyyy-MM-dd", date);
     }
 }

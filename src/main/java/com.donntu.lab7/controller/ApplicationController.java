@@ -47,5 +47,11 @@ public class ApplicationController {
         System.out.println(id);
     }
 
+    @PostMapping("/total")
+    public Map<String, String> putClient(@RequestBody Map<String, String> request) {
+        System.out.println(request);
+        return request;
+    }
+
 
 }
