@@ -16,7 +16,6 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-
     @GetMapping("/total")
     public String getTotal() {
         return applicationService.getJson("total");
@@ -34,43 +33,41 @@ public class ApplicationController {
 
     @DeleteMapping("/total")
     public void deleteTotal(@RequestBody Map<String, String> id) {
-        System.out.println(id);
+        applicationService.deleteClient(Long.valueOf(id.get("id")));
     }
 
     @DeleteMapping("/payment")
     public void deletePayment(@RequestBody Map<String, String> id) {
-        System.out.println(id);
+        applicationService.deletePayment(Long.valueOf(id.get("id")));
     }
 
     @DeleteMapping("/departure")
     public void deleteDeparture(@RequestBody Map<String, String> id) {
-        System.out.println(id);
+        applicationService.deleteDepDate(Long.valueOf(id.get("id")));
     }
 
     @PostMapping("/total")
-    public Map<String, String> putClient(@RequestBody Map<String, String> request) {
-        System.out.println("save " + request);
-        return request;
+    public String putClient(@RequestBody Map<String, String> request) {
+        return applicationService.putClient(request);
     }
 
     @PutMapping("/total")
-    public Map<String, String> updateClient(@RequestBody Map<String, String> request) {
-        System.out.println("update " + request);
-        return request;
+    public String updateClient(@RequestBody Map<String, String> request) {
+        return applicationService.updateClient(request);
     }
 
     @GetMapping("/payment/{id}")
-    public String getClientByPaymentId(@PathVariable Integer id) {
+    public String getClientByPaymentId(@PathVariable Long id) {
         return applicationService.getJsonClientByPaymentId(id);
     }
 
     @GetMapping("/total/{id}")
-    public String getClientById(@PathVariable Integer id) {
+    public String getClientById(@PathVariable Long id) {
         return applicationService.getJsonClientById(id);
     }
 
     @GetMapping("/departure/{id}")
-    public String getClientByDepartureId(@PathVariable Integer id) {
+    public String getClientByDepartureId(@PathVariable Long id) {
         return applicationService.getJsonClientByDepartureId(id);
     }
 

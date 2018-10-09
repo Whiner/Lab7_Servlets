@@ -50,11 +50,19 @@ Vue.component('total-list-row', {
 });
 
 Vue.component('total-list', {
-    props: ['clients', 'editMethod', 'delMethod'],
+    props: ['clients', 'editMethod', 'delMethod', 'filter'],
+    computed: {
+        filteredClients: function () {
+            let self = this;
+            return this.clients.filter(function (client) {
+                return client.fio.indexOf(self.filter) > -1
+            })
+        }
+    },
     template:
     '<div class="list-group">' +
     '   <total-list-head/>' +
-    '   <total-list-row v-for="client in clients" :key="client.id" :client="client" :name="client.id"' +
+    '   <total-list-row v-for="client in filteredClients" :key="client.id" :client="client" :name="client.id"' +
     '       :editMethod="editMethod" :delMethod="delMethod"></total-list-row>' +
     '</div>'
 });
@@ -86,11 +94,19 @@ Vue.component('departure-list-row', {
 });
 
 Vue.component('departure-list', {
-    props: ['departureDates', 'editMethod', 'delMethod'],
+    props: ['departureDates', 'editMethod', 'delMethod', 'filter'],
+    computed: {
+        filteredDates: function () {
+            let self = this;
+            return this.departureDates.filter(function (date) {
+                return date.date.indexOf(self.filter) > -1
+            })
+        }
+    },
     template:
     '<div class="list-group">' +
     '   <departure-list-head/>' +
-    '   <departure-list-row v-for="departure in departureDates" :key="departure.id" :departure="departure" ' +
+    '   <departure-list-row v-for="departure in filteredDates" :key="departure.id" :departure="departure" ' +
     ':name="departure.id" :editMethod="editMethod" :delMethod="delMethod"></departure-list-row>' +
     '</div>'
 });
@@ -126,18 +142,26 @@ Vue.component('payment-list-row', {
 });
 
 Vue.component('payment-list', {
-    props: ['payments', 'editMethod', 'delMethod'],
+    props: ['payments', 'editMethod', 'delMethod', 'filter'],
+    computed: {
+        filteredPayments: function () {
+            let self = this;
+            return this.payments.filter(function (payment) {
+                return payment.form.indexOf(self.filter) > -1
+            })
+        }
+    },
     template:
     '<div class="list-group">' +
     '   <payment-list-head/>' +
-    '   <payment-list-row v-for="payment in payments" :key="payment.id" :payment="payment" ' +
+    '   <payment-list-row v-for="payment in filteredPayments" :key="payment.id" :payment="payment" ' +
     ':name="payment.id" :editMethod="editMethod" :delMethod="delMethod"></payment-list-row>' +
     '</div>',
 
 });
 
 Vue.component('navbar', {
-    props: ['getData', 'setApi'],
+    props: ['getData', 'setApi', 'setFilter'],
     template:
     '<nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav">' +
     '    <a class="navbar-brand">Лабораторная 7</a>' +
@@ -157,10 +181,10 @@ Vue.component('navbar', {
     '                <input class="btn btn-light" type="button" @click="setPayment" value="Платежи"/>' +
     '            </li>' +
     '        </ul>' +
-    '        <form class="form-inline my-2 my-lg-0">' +
-    '            <input class="form-control mr-sm-2" placeholder="Фильтр">' +
-    '            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Фильтр</button>' +
-    '        </form>' +
+    '        <div class="form-inline my-2 my-lg-0">' +
+    '            <input class="form-control mr-sm-2 my-2" v-model="filter" placeholder="Фильтр">' +
+    '            <button class="btn btn-outline-success my-2 my-sm-0" @click="sFilter">Фильтр</button>' +
+    '        </div>' +
     '    </div>' +
     '</nav>',
     methods: {
@@ -175,6 +199,14 @@ Vue.component('navbar', {
         setPayment: function () {
             this.setApi('payment');
             this.getData();
+        },
+        sFilter: function () {
+            this.setFilter(this.filter);
+        }
+    },
+    data: function () {
+        return {
+            filter: ''
         }
     }
 });
@@ -192,11 +224,15 @@ Vue.component('edit-form', {
             payDate: '',
             note: '',
             buttonValue: 'Добавить',
-            clientApi: null
+            clientApi: null,
+            currClient: null
         };
     },
     watch: {
         client: function () {
+            this.currClient = this.client;
+        },
+        currClient: function () {
             this.fillClient();
         }
     },
@@ -250,21 +286,21 @@ Vue.component('edit-form', {
     '</div>' +
     '<div class="col-1"></div> ' +
     '<div class="col-3">' +
-    '    <input class="btn btn-outline-dark mx-auto" @click="client = null" type="button" value="Очистить">' +
+    '    <input class="btn btn-outline-dark mx-auto" @click="clear" type="button" value="Очистить">' +
     '</div>' +
     '</div>' +
     '</form>',
     methods: {
         fillClient: function () {
-            if (this.client) {
-                this.fio = this.client.fio;
-                this.passport = this.client.passportNumber;
-                this.tel = this.client.phoneNumber;
-                this.arrDate = this.client.arrivalDate;
-                this.depDate = this.client.departureDate;
-                this.payForm = this.client.payment.form;
-                this.payDate = this.client.payment.date;
-                this.note = this.client.payment.note;
+            if (this.currClient) {
+                this.fio = this.currClient.fio;
+                this.passport = this.currClient.passportNumber;
+                this.tel = this.currClient.phoneNumber;
+                this.arrDate = this.currClient.arrivalDate;
+                this.depDate = this.currClient.departureDate;
+                this.note = this.currClient.payment.note;
+                this.payDate = this.currClient.payment.date;
+                this.payForm = this.currClient.payment.form;
                 this.buttonValue = 'Сохранить изменения';
             } else {
                 this.fio = '';
@@ -294,9 +330,9 @@ Vue.component('edit-form', {
             if (!this.clientApi) {
                 this.clientApi = Vue.resource("total");
             }
-            if (this.client) {
+            if (this.currClient) {
                 let new_client = {
-                    id: this.client.id,
+                    id: this.currClient.id,
                     fio: this.fio,
                     phoneNumber: this.tel,
                     passportNumber: this.passport,
@@ -308,10 +344,10 @@ Vue.component('edit-form', {
                 };
                 this.clientApi.update({id: new_client.id}, new_client).then(result => {
                     result.json().then(status => {
-                        if (status.status === 'ok') {
+                        if (status[0].status === 'ok') {
                             alert("Успешно обновлено");
                         } else {
-                            alert("Клиент не найден");
+                            alert("Клиент не найден или произошла ошибка при его обновлении");
                         }
                     })
                 })
@@ -328,7 +364,7 @@ Vue.component('edit-form', {
                 };
                 this.clientApi.save({}, new_client).then(result => {
                     result.json().then(status => {
-                        if (status.status === 'ok') {
+                        if (status[0].status === 'ok') {
                             alert("Успешно добавлено");
                         } else {
                             alert("Проблемасы");
@@ -336,6 +372,9 @@ Vue.component('edit-form', {
                     })
                 })
             }
+        },
+        clear: function () {
+            this.currClient = null;
         }
     }
 });
@@ -354,15 +393,16 @@ Vue.component('lists', {
         return {
             arr: [],
             api: '',
+            filter: '',
             clientApi: null
         }
     },
     template:
     '<div>' +
-    '<navbar :getData="getData" :setApi="setApi"/>' +
-    '<total-list v-if="api === \'total\'" :clients="arr" :editMethod="edit" :delMethod="del"/>' +
-    '<departure-list v-else-if="api === \'departure\'" :departureDates="arr" :editMethod="edit" :delMethod="del"/>' +
-    '<payment-list v-else-if="api === \'payment\'" :payments="arr" :editMethod="edit" :delMethod="del"/>' +
+    '<navbar :getData="getData" :setApi="setApi" :setFilter="setFilter"/>' +
+    '<total-list v-if="api === \'total\'" :clients="arr" :editMethod="edit" :delMethod="del" :filter="filter"/>' +
+    '<departure-list v-else-if="api === \'departure\'" :departureDates="arr" :editMethod="edit" :delMethod="del" :filter="filter"/>' +
+    '<payment-list v-else-if="api === \'payment\'" :payments="arr" :editMethod="edit" :delMethod="del" :filter="filter"/>' +
     '</div>',
     methods: {
         setApi: function (_api) {
@@ -405,6 +445,9 @@ Vue.component('lists', {
                     }
                 )
             });
+        },
+        setFilter: function (filter) {
+            this.filter = filter;
         }
     },
     created: function () {
