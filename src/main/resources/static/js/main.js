@@ -1,10 +1,11 @@
 Vue.component('row-settings', {
     props: ['editMethod', 'delMethod', 'object'],
     template:
-    '<div class="container-fluid row">' +
+    '<div class="container-fluid">' +
+    '<div class="row">' +
     '    <div class="col-6" >' +
     '        <a href="#" v-if="editMethod">' +
-    '            <img style="width: 25px" src="../images/edit.png" @click="editMethod(object)"/>' +
+    '            <img style="width: 25px" src="../images/edit.png" @click="editMethod(object.id)"/>' +
     '        </a>' +
     '    </div>' +
     '    <div class="col-6"> ' +
@@ -12,6 +13,7 @@ Vue.component('row-settings', {
     '            <img style="width: 25px" src="../images/delete.png"  @click="delMethod(object)"/>' +
     '        </a>' +
     '    </div>' +
+    '</div>' +
     '</div>'
 });
 
@@ -130,7 +132,8 @@ Vue.component('payment-list', {
     '   <payment-list-head/>' +
     '   <payment-list-row v-for="payment in payments" :key="payment.id" :payment="payment" ' +
     ':name="payment.id" :editMethod="editMethod" :delMethod="delMethod"></payment-list-row>' +
-    '</div>'
+    '</div>',
+
 });
 
 Vue.component('navbar', {
@@ -152,9 +155,6 @@ Vue.component('navbar', {
     '            </li>' +
     '            <li class="nav-item w-100">' +
     '                <input class="btn btn-light" type="button" @click="setPayment" value="Платежи"/>' +
-    '            </li>' +
-    '            <li class="nav-item w-100">' +
-    '                <input class="btn btn-light" type="button" value="Добавить запись"/>' +
     '            </li>' +
     '        </ul>' +
     '        <form class="form-inline my-2 my-lg-0">' +
@@ -191,12 +191,12 @@ Vue.component('edit-form', {
             payForm: '',
             payDate: '',
             note: '',
+            buttonValue: 'Добавить',
             clientApi: null
         };
     },
     watch: {
-        client: function (val) {
-            console.log(val);
+        client: function () {
             this.fillClient();
         }
     },
@@ -244,20 +244,19 @@ Vue.component('edit-form', {
     '    <textarea v-model="note" class="form-control" id="exampleFormControlInput8" placeholder="(Не обязательно)"/>' +
     '</div>' +
     '</div>' +
-    '<div>' +
-    '    <input class="btn btn-outline-dark mx-auto" @click="save" type="button" value="Сохранить">' +
+    '<div class="row">' +
+    '<div class="col-3">' +
+    '    <input class="btn btn-outline-dark mx-auto" @click="save" type="button" :value="buttonValue">' +
+    '</div>' +
+    '<div class="col-1"></div> ' +
+    '<div class="col-3">' +
+    '    <input class="btn btn-outline-dark mx-auto" @click="client = null" type="button" value="Очистить">' +
+    '</div>' +
     '</div>' +
     '</form>',
     methods: {
         fillClient: function () {
-            console.log("Зашло");
-            if (this.clientApi === null) {
-                this.clientApi = Vue.resource('total');
-            }
-            if (!this.client) {
-                this.save();
-
-            } else {
+            if (this.client) {
                 this.fio = this.client.fio;
                 this.passport = this.client.passportNumber;
                 this.tel = this.client.phoneNumber;
@@ -266,27 +265,77 @@ Vue.component('edit-form', {
                 this.payForm = this.client.payment.form;
                 this.payDate = this.client.payment.date;
                 this.note = this.client.payment.note;
+                this.buttonValue = 'Сохранить изменения';
+            } else {
+                this.fio = '';
+                this.passport = '';
+                this.tel = '';
+                this.arrDate = '';
+                this.depDate = '';
+                this.payForm = '';
+                this.payDate = '';
+                this.note = '';
+                this.buttonValue = 'Добавить';
             }
         },
         save: function () {
-            let new_client = {
-                fio: this.fio,
-                phoneNumber: this.tel,
-                passportNumber: this.passport,
-                arrivalDate: this.arrDate,
-                departureDate: this.depDate,
-                payNote: this.note,
-                payDate: this.payDate,
-                payForm: this.payForm
+            if (this.fio === '' ||
+                this.passport === '' ||
+                this.tel === '' ||
+                this.arrDate === '' ||
+                this.depDate === '' ||
+                this.payForm === '' ||
+                this.payDate === '' ||
+                this.note === '') {
+                alert('Заполните все поля');
+                return;
+            }
 
-
-            };
-            this.clientApi.save({}, new_client).then(result => {
-                if (result.ok) {
-                    console.log("Успешно");
-                }
-                console.log(result.json());
-            })
+            if (!this.clientApi) {
+                this.clientApi = Vue.resource("total");
+            }
+            if (this.client) {
+                let new_client = {
+                    id: this.client.id,
+                    fio: this.fio,
+                    phoneNumber: this.tel,
+                    passportNumber: this.passport,
+                    arrivalDate: this.arrDate,
+                    departureDate: this.depDate,
+                    payNote: this.note,
+                    payDate: this.payDate,
+                    payForm: this.payForm
+                };
+                this.clientApi.update({id: new_client.id}, new_client).then(result => {
+                    result.json().then(status => {
+                        if (status.status === 'ok') {
+                            alert("Успешно обновлено");
+                        } else {
+                            alert("Клиент не найден");
+                        }
+                    })
+                })
+            } else {
+                let new_client = {
+                    fio: this.fio,
+                    phoneNumber: this.tel,
+                    passportNumber: this.passport,
+                    arrivalDate: this.arrDate,
+                    departureDate: this.depDate,
+                    payNote: this.note,
+                    payDate: this.payDate,
+                    payForm: this.payForm
+                };
+                this.clientApi.save({}, new_client).then(result => {
+                    result.json().then(status => {
+                        if (status.status === 'ok') {
+                            alert("Успешно добавлено");
+                        } else {
+                            alert("Проблемасы");
+                        }
+                    })
+                })
+            }
         }
     }
 });
@@ -325,7 +374,6 @@ Vue.component('lists', {
             }
             this.arr = [];
             this.clientApi = Vue.resource(this.api);
-            console.log(this.api);
             this.clientApi.get().then(
                 result => {
                     result.json().then(
@@ -348,8 +396,15 @@ Vue.component('lists', {
                 }
             )
         },
-        edit: function (object) {
-            form.client = object;
+        edit: function (id) {
+            console.log('edit = ' + id);
+            let api = Vue.resource('/' + this.api + '/' + id);
+            api.get().then(result => {
+                result.json().then(obj => {
+                        form.client = obj;
+                    }
+                )
+            });
         }
     },
     created: function () {

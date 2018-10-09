@@ -49,8 +49,29 @@ public class ApplicationController {
 
     @PostMapping("/total")
     public Map<String, String> putClient(@RequestBody Map<String, String> request) {
-        System.out.println(request);
+        System.out.println("save " + request);
         return request;
+    }
+
+    @PutMapping("/total")
+    public Map<String, String> updateClient(@RequestBody Map<String, String> request) {
+        System.out.println("update " + request);
+        return request;
+    }
+
+    @GetMapping("/payment/{id}")
+    public String getClientByPaymentId(@PathVariable Integer id) {
+        return applicationService.getJsonClientByPaymentId(id);
+    }
+
+    @GetMapping("/total/{id}")
+    public String getClientById(@PathVariable Integer id) {
+        return applicationService.getJsonClientById(id);
+    }
+
+    @GetMapping("/departure/{id}")
+    public String getClientByDepartureId(@PathVariable Integer id) {
+        return applicationService.getJsonClientByDepartureId(id);
     }
 
 

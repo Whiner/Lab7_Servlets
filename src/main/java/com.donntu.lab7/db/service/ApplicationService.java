@@ -1,12 +1,11 @@
 package com.donntu.lab7.db.service;
 
 import com.donntu.lab7.Converter;
+import com.donntu.lab7.JsonConverter;
 import com.donntu.lab7.db.entities.Client;
 import com.donntu.lab7.db.repos.ClientRepository;
 import com.donntu.lab7.db.repos.DepartureRepository;
 import com.donntu.lab7.db.repos.PaymentRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,21 +34,11 @@ public class ApplicationService {
     }
 
     private String getTotalJson() {
-        try {
-            return new ObjectMapper().writer().writeValueAsString(getAllClients());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonConverter.convert(getAllClients());
     }
 
     private String getDepartureJson() {
-        try {
-            return new ObjectMapper().writer().writeValueAsString(departureRepository.findAll());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonConverter.convert(departureRepository.findAll());
     }
 
     public String getJson(String tableType) {
@@ -66,11 +55,18 @@ public class ApplicationService {
     }
 
     private String getPaymentJson() {
-        try {
-            return new ObjectMapper().writer().writeValueAsString(paymentRepository.findAll());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonConverter.convert(paymentRepository.findAll());
+    }
+
+    public String getJsonClientByPaymentId(Integer integer) {
+        return JsonConverter.convert(clientRepository.findByPaymentId(integer));
+    }
+
+    public String getJsonClientById(Integer id) {
+        return JsonConverter.convert(clientRepository.findById(id));
+    }
+
+    public String getJsonClientByDepartureId(Integer id) {
+        return JsonConverter.convert(clientRepository.findByDepartureDateId(id));
     }
 }
